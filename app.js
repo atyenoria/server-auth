@@ -16,14 +16,17 @@ var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'ejs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
+
+
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
 
 
 var session = require('express-session')
@@ -34,7 +37,8 @@ app.use(session({
         url: 'mongodb://localhost/sample'
     }),
     cookie: {
-        httpOnly: false,
+        httpOnly: true,
+        secure: true,
         maxAge: new Date(Date.now() + 60 * 60 * 1000)
     },
     resave: false,
@@ -42,12 +46,35 @@ app.use(session({
 }));
 
 
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-app.use('/', routes);
+//app.use('/', routes);
+
+
+var csrf = require('csurf')
+var csrfProtection = csrf({ cookie: true })
+var parseForm = bodyParser.urlencoded({ extended: false })
+
+
+
+// create api router
+var api = createApiRouter()
+
+// mount api before csrf is appended to the app stack
+app.use('/api', api)
+
+// now add csrf, after the "/api" was mounted
+app.use(csrfProtection)
+
+
+app.get('/', function (req, res) {
+    res.render('pages/about', { csrfToken: req.csrfToken()});
+});
+
 
 // passport config
 var Account = require('./models/account');
@@ -55,8 +82,49 @@ passport.use(new LocalStrategy(Account.authenticate()));
 passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
 
+
+
+app.post('/finish' , parseForm , function(req, res, next) {
+    Account.register(new Account({ username : req.body.username }), req.body.password, function(err, account) {
+        console.log("test")
+        if (err) {
+            console.log("error")
+        }
+
+        passport.authenticate('local')(req, res, function () {
+            req.session.save(function (err) {
+
+                if (err) {
+                    console.log("error")
+                    return next(err);
+                }
+                console.log("ok")
+                res.send('csrf was required to get here')
+            });
+        });
+
+    });
+
+});
+
+
+function createApiRouter() {
+    var router = new express.Router()
+
+    router.get('/getProfile', function(req, res) {
+        res.send('no csrf to get here')
+    })
+
+    return router
+}
+
+
+
+
 // mongoose
 mongoose.connect('mongodb://localhost/passport_local_mongoose_express4');
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -91,3 +159,4 @@ app.use(function(err, req, res, next) {
 
 
 module.exports = app;
+
