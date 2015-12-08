@@ -1,0 +1,33 @@
+{
+  "name": "passport-local-express4",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:mjhea0/passport-local-express4.git"
+  },
+  "author": "Michael Herman <michael@mherman.org>",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "*",
+    "chai": "^3.4.1",
+    "connect-mongo": "*",
+    "cookie-parser": "*",
+    "debug": "*",
+    "express": "*",
+    "express-session": "*",
+    "jade": "*",
+    "mocha": "^2.3.4",
+    "mongoose": "*",
+    "morgan": "*",
+    "passport": "^0.3.2",
+    "passport-local": "^1.0.0",
+    "passport-local-mongoose": "^3.1.0",
+    "serve-favicon": "*",
+    "should": "^7.1.1"
+  }
+}
