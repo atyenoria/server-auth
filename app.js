@@ -84,8 +84,19 @@ passport.deserializeUser(Account.deserializeUser());
 
 
 
+
 app.post('/finish' , parseForm , function(req, res, next) {
-    Account.register(new Account({ username : req.body.username }), req.body.password, function(err, account) {
+
+    var jwt = require('jsonwebtoken');
+    var jwtsecret = "test";
+    var jwt_token;
+    jwt_token = jwt.sign({
+        user_sub: req.body.username,
+        user: 'owner1',
+        room: "room1"
+    }, jwtsecret);
+
+    Account.register(new Account({ username : req.body.username , jwt: jwt_token }), req.body.password, function(err, account) {
         console.log("test")
         if (err) {
             console.log("error")
@@ -99,13 +110,14 @@ app.post('/finish' , parseForm , function(req, res, next) {
                     return next(err);
                 }
                 console.log("ok")
-                res.send('csrf was required to get here')
+                res.send('your jwt token is', jwt_token)
             });
         });
 
     });
 
 });
+
 
 
 function createApiRouter() {

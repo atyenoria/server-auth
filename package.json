@@ -23,6 +23,7 @@
     "express": "*",
     "express-session": "*",
     "jade": "*",
+    "jsonwebtoken": "^5.4.1",
     "mocha": "^2.3.4",
     "mongoose": "*",
     "morgan": "*",
